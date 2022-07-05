@@ -1,7 +1,7 @@
 FROM opensearchproject/opensearch:2.0.0
 
 ENV AWS_ACCESS_KEY_ID XXXX
-ENV AWS_SECRET_ACCESS_KEY XXXX
+ENV AWS_SECRET_ACCESS_KEY XXX
 
 
 RUN /usr/share/opensearch/bin/opensearch-plugin install --batch repository-s3
@@ -17,7 +17,7 @@ ADD ./public.pem /usr/share/opensearch/public.pem
 RUN /usr/share/opensearch/bin/opensearch-keystore add-file --force encrypted.s3.default.private_key /usr/share/opensearch/key.pem
 RUN /usr/share/opensearch/bin/opensearch-keystore add-file --force encrypted.s3.default.public_key /usr/share/opensearch/public.pem
 ADD https://github.com/corretto/amazon-corretto-crypto-provider/releases/download/1.6.1/AmazonCorrettoCryptoProvider-1.6.1-linux-x86_64.jar /usr/share/opensearch/plugins/encrypted-repository/
-ADD amazon-corretto-crypto-provider-jdk15.security /usr/share/opensearch/config/amazon-corretto-crypto-provider.security
+ADD https://raw.githubusercontent.com/corretto/amazon-corretto-crypto-provider/develop/etc/amazon-corretto-crypto-provider-jdk15.security   /usr/share/opensearch/config/amazon-corretto-crypto-provider.security
 RUN echo "encrypted.security_provider: com.amazon.corretto.crypto.provider.AmazonCorrettoCryptoProvider" >> /usr/share/opensearch/config/opensearch.yml
 
 
