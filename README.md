@@ -26,17 +26,11 @@ Creating fake logs send then in Opensearch
 docker run -it  --log-driver fluentd --net host  --log-opt fluentd-address=127.0.0.1:24224 --log-opt tag=es --rm mingrammer/flog -b 104857600
 ```
 
-**Caddy v2 does not accept plaintext passwords. It MUST be provided as a hash value. The above password hash corresponds to ADMIN_PASSWORD 'admin'. To know how to generate hash password, refer [Updating Caddy to v2](#Updating-Caddy-to-v2)**
-
 Prerequisites:
 
 * Docker Engine >= 1.13
 * Docker Compose >= 1.11
 
-## Updating Caddy to v2
-
-Perform a `docker run --rm caddy caddy hash-password --plaintext 'ADMIN_PASSWORD'` in order to generate a hash for your new password.
-ENSURE that you replace `ADMIN_PASSWORD` with new plain text password and `ADMIN_PASSWORD_HASH` with the hashed password references in [docker-compose.yml](./docker-compose.yml) for the caddy container.
 
 Containers:
 
