@@ -1,7 +1,7 @@
 FROM opensearchproject/opensearch:2.0.0
 
-ENV AWS_ACCESS_KEY_ID XXXX
-ENV AWS_SECRET_ACCESS_KEY XXX 
+ENV AWS_ACCESS_KEY_ID KEY_REPLACE_ME
+ENV AWS_SECRET_ACCESS_KEY SECRET_REPLACE_ME
 
 
 RUN /usr/share/opensearch/bin/opensearch-plugin install --batch repository-s3
