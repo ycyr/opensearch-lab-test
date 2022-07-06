@@ -40,7 +40,7 @@ Containers:
 * cAdvisor (containers metrics collector)
 * Caddy (reverse proxy and basic auth provider for prometheus)
 
-Cheatsheet for testing Snaphot
+Cheatsheet for testing snaphost
 
 ```
 
