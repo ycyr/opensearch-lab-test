@@ -1,0 +1,41 @@
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+
+  # Attach these labels to any time series or alerts when communicating with
+  # external systems (federation, remote storage, Alertmanager).
+
+# A scrape configuration containing exactly one endpoint to scrape.
+scrape_configs:
+  - job_name: 'nodeexporter'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['nodeexporter:9100']
+
+  - job_name: 'cadvisor'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['cadvisor:8080']
+
+  - job_name: 'prometheus'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'fluentd'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['fluentd:24231']
+  - job_name: opensearch
+    metrics_path: "/_prometheus/metrics"
+    static_configs:
+    scheme: https
+    tls_config:
+      insecure_skip_verify: true
+    basic_auth:
+      username: admin
+      password: admin
+    static_configs:
+    - targets:
+         - opensearch-node1:9200
+

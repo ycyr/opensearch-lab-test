@@ -1,0 +1,22 @@
+:9090 {
+    basicauth /* {
+        {$ADMIN_USER} {$ADMIN_PASSWORD_HASH}
+    }
+    reverse_proxy prometheus:9090
+}
+
+:9200 {
+    reverse_proxy opensearch-node1:9200
+}
+
+:9000 {
+    reverse_proxy cerebro:9000
+}
+
+:3000 {
+    reverse_proxy grafana:3000
+}
+
+:5601 {
+    reverse_proxy opensearch-dashboard:5601
+}

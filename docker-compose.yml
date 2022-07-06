@@ -2,7 +2,7 @@ version: '3'
 services:
   opensearch-node1:
     build:
-      context: .
+      context: ./opensearch 
     container_name: opensearch-node1
     environment:
       - cluster.name=opensearch-cluster
@@ -10,7 +10,7 @@ services:
       - discovery.seed_hosts=opensearch-node1,opensearch-node2
       - cluster.initial_master_nodes=opensearch-node1,opensearch-node2
       - bootstrap.memory_lock=true # along with the memlock settings below, disables swapping
-      - "OPENSEARCH_JAVA_OPTS=-Xms4g -Xmx4g -Djava.security.properties=/usr/share/opensearch/config/amazon-corretto-crypto-provider.security" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
+      - "OPENSEARCH_JAVA_OPTS=-Xms4g -Xmx4g -Djava.security.properties=/usr/share/opensearch/config/amazon-corretto-crypto-provider.security" 
     ulimits:
       memlock:
         soft: -1
@@ -20,9 +20,9 @@ services:
         hard: 65536
     volumes:
       - opensearch-data1:/usr/share/opensearch/data
-    ports:
-      - 9200:9200
-      - 9600:9600 # required for Performance Analyzer
+    #expose:
+    #  - 9200
+    #  - 9600
     networks:
       - opensearch-net
   opensearch-node2:
@@ -35,7 +35,7 @@ services:
       - discovery.seed_hosts=opensearch-node1,opensearch-node2
       - cluster.initial_master_nodes=opensearch-node1,opensearch-node2
       - bootstrap.memory_lock=true
-      - "OPENSEARCH_JAVA_OPTS=-Xms4g -Xmx4g -Djava.security.properties=/usr/share/opensearch/config/amazon-corretto-crypto-provider.security" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
+      - "OPENSEARCH_JAVA_OPTS=-Xms4g -Xmx4g -Djava.security.properties=/usr/share/opensearch/config/amazon-corretto-crypto-provider.security" 
     ulimits:
       memlock:
         soft: -1
@@ -50,18 +50,118 @@ services:
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:2.0.0
     container_name: opensearch-dashboards
-    ports:
-      - 5601:5601
-    expose:
-      - "5601"
+    #expose:
+    #  - "5601"
     environment:
       OPENSEARCH_HOSTS: '["https://opensearch-node1:9200","https://opensearch-node2:9200"]'
     networks:
       - opensearch-net
-      
+  fluentd:
+    build:
+      context: ./fluentd
+      dockerfile: Dockerfile.fluentd
+    container_name: fluentd
+    expose:
+      - 24224
+      - 24231
+    networks:
+      - opensearch-net
+  cerebro:
+     container_name: cerebros
+     image: lmenezes/cerebro
+     command: -Dplay.ws.ssl.loose.acceptAnyCertificate=true
+     #expose:
+     #   - 9000
+     networks:
+        - opensearch-net
+  prometheus:
+    image: prom/prometheus:v2.36.1
+    container_name: prometheus
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    #expose:
+    #  - 9090
+    networks:
+      - opensearch-net
+  nodeexporter:
+    image: prom/node-exporter:v1.3.1
+    container_name: nodeexporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    #expose:
+    #  - 9100
+    networks:
+      - opensearch-net
+  grafana:
+    image: grafana/grafana:8.5.5
+    container_name: grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+    environment:
+      - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+    #expose:
+    #  - 3000
+    networks:
+      - opensearch-net
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.44.0
+    container_name: cadvisor
+    privileged: true
+    devices:
+      - /dev/kmsg:/dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      #- /cgroup:/cgroup:ro #doesn't work on MacOS only for Linux
+    restart: unless-stopped
+    #expose:
+    #  - 8080
+    networks:
+      - opensearch-net
+  #caddy:
+  #  image: caddy:2.3.0
+  #  container_name: caddy
+  #  ports:
+  #    - "3000:3000"
+  #    - "9090:9090"
+  #    - "9090:9090"
+  #    - "5601:5601"
+  #  volumes:
+  #    - ./caddy:/etc/caddy
+  #  environment:
+  #    - ADMIN_USER=${ADMIN_USER:-admin}
+  #    - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+  #    - ADMIN_PASSWORD_HASH=${ADMIN_PASSWORD_HASH:-JDJhJDE0JE91S1FrN0Z0VEsyWmhrQVpON1VzdHVLSDkyWHdsN0xNbEZYdnNIZm1pb2d1blg4Y09mL0ZP}
+  #  networks:
+  #    - opensearch-net
+
 volumes:
   opensearch-data1:
   opensearch-data2:
+  prometheus_data: 
+  grafana_data: 
 
 networks:
   opensearch-net:
