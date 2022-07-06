@@ -20,14 +20,14 @@ services:
         hard: 65536
     volumes:
       - opensearch-data1:/usr/share/opensearch/data
-    #expose:
-    #  - 9200
-    #  - 9600
+    expose:
+      - 9200
+      - 9600
     networks:
       - opensearch-net
   opensearch-node2:
     build:
-      context: .
+      context: ./opensearch 
     container_name: opensearch-node2
     environment:
       - cluster.name=opensearch-cluster
@@ -50,8 +50,8 @@ services:
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:2.0.0
     container_name: opensearch-dashboards
-    #expose:
-    #  - "5601"
+    expose:
+      - "5601"
     environment:
       OPENSEARCH_HOSTS: '["https://opensearch-node1:9200","https://opensearch-node2:9200"]'
     networks:
@@ -70,8 +70,8 @@ services:
      container_name: cerebros
      image: lmenezes/cerebro
      command: -Dplay.ws.ssl.loose.acceptAnyCertificate=true
-     #expose:
-     #   - 9000
+     expose:
+        - 9000
      networks:
         - opensearch-net
   prometheus:
@@ -87,8 +87,8 @@ services:
       - '--web.console.templates=/etc/prometheus/consoles'
       - '--storage.tsdb.retention.time=200h'
       - '--web.enable-lifecycle'
-    #expose:
-    #  - 9090
+    expose:
+      - 9090
     networks:
       - opensearch-net
   nodeexporter:
@@ -103,8 +103,8 @@ services:
       - '--path.rootfs=/rootfs'
       - '--path.sysfs=/host/sys'
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
-    #expose:
-    #  - 9100
+    expose:
+      - 9100
     networks:
       - opensearch-net
   grafana:
@@ -119,8 +119,8 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
     restart: unless-stopped
-    #expose:
-    #  - 3000
+    expose:
+      - 3000
     networks:
       - opensearch-net
   cadvisor:
@@ -136,26 +136,26 @@ services:
       - /var/lib/docker:/var/lib/docker:ro
       #- /cgroup:/cgroup:ro #doesn't work on MacOS only for Linux
     restart: unless-stopped
-    #expose:
-    #  - 8080
+    expose:
+      - 8080
     networks:
       - opensearch-net
-  #caddy:
-  #  image: caddy:2.3.0
-  #  container_name: caddy
-  #  ports:
-  #    - "3000:3000"
-  #    - "9090:9090"
-  #    - "9090:9090"
-  #    - "5601:5601"
-  #  volumes:
-  #    - ./caddy:/etc/caddy
-  #  environment:
-  #    - ADMIN_USER=${ADMIN_USER:-admin}
-  #    - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
-  #    - ADMIN_PASSWORD_HASH=${ADMIN_PASSWORD_HASH:-JDJhJDE0JE91S1FrN0Z0VEsyWmhrQVpON1VzdHVLSDkyWHdsN0xNbEZYdnNIZm1pb2d1blg4Y09mL0ZP}
-  #  networks:
-  #    - opensearch-net
+  caddy:
+    image: caddy:2.3.0
+    container_name: caddy
+    ports:
+      - "3000:3000"
+      - "9000:9000"
+      - "9090:9090"
+      - "5601:5601"
+    volumes:
+      - ./caddy:/etc/caddy
+    environment:
+      - ADMIN_USER=${ADMIN_USER:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+      - ADMIN_PASSWORD_HASH=${ADMIN_PASSWORD_HASH:-JDJhJDE0JE91S1FrN0Z0VEsyWmhrQVpON1VzdHVLSDkyWHdsN0xNbEZYdnNIZm1pb2d1blg4Y09mL0ZP}
+    networks:
+      - opensearch-net
 
 volumes:
   opensearch-data1:
