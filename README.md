@@ -31,6 +31,16 @@ Prerequisites:
 * Docker Engine >= 1.13
 * Docker Compose >= 1.11
 
+Make sure the Linux setting vm.max_map_count is set to at least 262144. Even if you use the Docker image, set this value on the host machine. To check the current value, run this command:
+
+```
+cat /proc/sys/vm/max_map_count
+```
+To increase the value, add the following line to /etc/sysctl.conf:
+```
+vm.max_map_count=262144
+```
+Then run ```sudo sysctl -p``` to reload.
 
 Containers:
 
