@@ -66,6 +66,8 @@ services:
     expose:
       - 24224
       - 24231
+    ports:
+      - 127.0.0.1:24224:24224
     networks:
       - opensearch-net
   cerebro:
