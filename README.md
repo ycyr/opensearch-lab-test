@@ -20,7 +20,7 @@ sed -i  's/SECRET_REPLACE_ME/YOUR_AWS_S3_SECRET_KEY/' Dockerfile
 cd ..
 ADMIN_USER=admin ADMIN_PASSWORD=admin ADMIN_PASSWORD_HASH=JDJhJDE0JE91S1FrN0Z0VEsyWmhrQVpON1VzdHVLSDkyWHdsN0xNbEZYdnNIZm1pb2d1blg4Y09mL0ZP docker-compose up -d
 ```
-Creating fake logs send then in Opensearch
+Creating fake logs send then in Opensearch in logstash-* index
 
 ```
 docker run -it  --log-driver fluentd --net host  --log-opt fluentd-address=127.0.0.1:24224 --log-opt tag=es --rm mingrammer/flog -b 104857600
