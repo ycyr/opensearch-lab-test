@@ -16,7 +16,8 @@ ADD ./key.pem /usr/share/opensearch/key.pem
 ADD ./public.pem /usr/share/opensearch/public.pem
 RUN /usr/share/opensearch/bin/opensearch-keystore add-file --force encrypted.s3.default.private_key /usr/share/opensearch/key.pem 
 RUN /usr/share/opensearch/bin/opensearch-keystore add-file --force encrypted.s3.default.public_key /usr/share/opensearch/public.pem
-ADD https://github.com/corretto/amazon-corretto-crypto-provider/releases/download/1.6.1/AmazonCorrettoCryptoProvider-1.6.1-linux-x86_64.jar /usr/share/opensearch/plugins/encrypted-repository/
+#ADD https://github.com/corretto/amazon-corretto-crypto-provider/releases/download/1.6.1/AmazonCorrettoCryptoProvider-1.6.1-linux-x86_64.jar /usr/share/opensearch/plugins/encrypted-repository/
+ADD https://repo1.maven.org/maven2/software/amazon/cryptools/AmazonCorrettoCryptoProvider/1.6.1/AmazonCorrettoCryptoProvider-1.6.1-linux-x86_64.jar /usr/share/opensearch/plugins/encrypted-repository/AmazonCorrettoCryptoProvider-1.6.1-linux-x86_64.jar 
 ADD https://raw.githubusercontent.com/corretto/amazon-corretto-crypto-provider/develop/etc/amazon-corretto-crypto-provider-jdk15.security   /usr/share/opensearch/config/amazon-corretto-crypto-provider.security
 RUN echo "encrypted.security_provider: com.amazon.corretto.crypto.provider.AmazonCorrettoCryptoProvider" >> /usr/share/opensearch/config/opensearch.yml
 
